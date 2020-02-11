@@ -28,6 +28,9 @@ Since 80% of features selected for this project are categorical and discrete, it
 One-hot encoding is the solution for this problem, by representing each features with binary vectors. In such case, the model will not have preference to a specific data point because it has better value representing its category.
 ## K fold cross-validation
 To assure the accuracy of our model and prevent under/over fitting, the evaluation of the performance of the model is required. To achieve that, we chose k folder cross-validation to re-sampling our dataset. The exact value for k will be decided during the implementation of this project.
+## Random Forest
+As the dimension of our data is low, random forest is more proper to choose. Besides, it maintains high accuracy.  After we apply Onehot encoding and k fold cross-validation, we would generate the random forest model with sklearn. And then we may feed in some Numpy arrays for training, ask it to make a prediction, evaluate the predictions, and see that they are reasonable. For checking if our predicting value is reasonable or not, we can pick up any tree we have generated and look at the feature importances of our explanatory variables.
+
 # Reference
 [1] Steam (service), last edited on 8 February 2020, https://en.wikipedia.org/wiki/Steam_(service)<br>
 [2] Steam Store Games (Clean dataset). (2020). Retrieved 11 February 2020, from https://www.kaggle.com/nikdavis/steam-store-games<br>
