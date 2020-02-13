@@ -23,13 +23,20 @@ Spark offers various interfaces which can be used to read and preprocessing our 
 As a free software machine learning library for python, sklearn features a various regression algorithms, including randomforest, decision trees which will be used for our project.
 # Algorithms
 After basic analysis, brainstorming and background research on the scope of our project and the characteristics of dataset, we decided to apply the following techniques or algorithms in our project, to get an accurate and efficient model:
+## Linear Regression
+Linear regression is a common Statistical Data Analysis technique.  It is used to determine the extent to which there is a linear relationship between a dependent variable and one or more independent variables. There are two types of linear regression, simple linear regression and multiple linear regression. We observed that there are more than 5 features is directly proportional to the results(rate of our good feedback). Therefore, we plan to try multiple linear regression model first to do the prediction. 
+## KNN
+As far as we know, KNN can be used for both classification and regression problems. The algorithm uses ‘feature similarity’ to predict values of any new data points. This means that the new point is assigned a value based on how closely it resembles the points in the training set. In our project, we plan to classify the games with the features into several categories and do the regression.
+
+## Random Forest
+As the dimension of our data is low, random forest is more proper to choose. Besides, it maintains high accuracy.  After we apply Onehot encoding and k fold cross-validation, we would generate the random forest model with sklearn. And then we may feed in some Numpy arrays for training, ask it to make a prediction, evaluate the predictions, and see that they are reasonable. For checking if our predicting value is reasonable or not, we can pick up any tree we have generated and look at the feature importances of our explanatory variables.
+  
 ## One-hot encoding
 Since 80% of features selected for this project are categorical and discrete, it is not a good idea to simply give an integer to represent each one of the categorical features, and feed them directly to the training phase. Because without any pre-processing, the output model will ‘think’ that the higher/lower the categorical value is, the better/worse the category is. However in fact, every category should be treated equally.<br>
 One-hot encoding is the solution for this problem, by representing each features with binary vectors. In such case, the model will not have preference to a specific data point because it has better value representing its category.
 ## K fold cross-validation
 To assure the accuracy of our model and prevent under/over fitting, the evaluation of the performance of the model is required. To achieve that, we chose k folder cross-validation to re-sampling our dataset. The exact value for k will be decided during the implementation of this project.
-## Random Forest
-As the dimension of our data is low, random forest is more proper to choose. Besides, it maintains high accuracy.  After we apply Onehot encoding and k fold cross-validation, we would generate the random forest model with sklearn. And then we may feed in some Numpy arrays for training, ask it to make a prediction, evaluate the predictions, and see that they are reasonable. For checking if our predicting value is reasonable or not, we can pick up any tree we have generated and look at the feature importances of our explanatory variables.
+
 
 # Reference
 [1] Steam (service), last edited on 8 February 2020, https://en.wikipedia.org/wiki/Steam_(service)<br>
