@@ -1,5 +1,6 @@
 
 from pyspark.sql import *
+from pyspark.sql.functions import lit
 from datetime import date
 
 
@@ -11,24 +12,26 @@ def init_spark():
         .getOrCreate()
     return spark
 def getDiffDays(startDate, endDate):
-    print(startDate)
+    
     startDateList = map(lambda x : int(x), startDate.split('-'))
     endDateList = map(lambda x: int(x), endDate.split('-'))
     startDate = date(*startDateList)
     endDate = date(*endDateList)
     diffDays = (endDate - startDate).days
-    print('diff days: ' + str(diffDays))
-    return diffDays
-
+    return str(diffDays)
+    
+    
+    
 originalDataPath = './data/steam.csv'
+unwantedCols = ['appid', 'name', 'publisher', 'genres']
 spark = init_spark()
-rawData = spark.read.csv(originalDataPath, header=True)
-print(rawData.columns)
+rawData = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True)
 
 #remove unwanted columns
-for it in ['appid', 'name', 'publisher', 'genre']:
+for it in unwantedCols:
     rawData = rawData.drop(it)
-# rawData.printSchema()
+rdd = rawData.rdd
 #convert release date to diff days since release to 2019-05-15
-rawData.select('release_date').rdd.flatMap(lambda x : (getDiffDays(x.release_date, '2019-05-15'), )).toDF()#这块我不会写，就是把release_date所有row换成diffdays
-rawData.show()
+df = rdd.map(lambda x : x + (getDiffDays(x.release_date, '2019-05-15'),)).toDF(rawData.columns + ['days'])
+df = df.drop('release_date')
+df.show()
