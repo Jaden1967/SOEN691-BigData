@@ -72,7 +72,7 @@ df.show()
 all_features=df.schema.names
 all_string_features=['developer','platforms','categories','steamspy_tags']
 all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
-all_float_features=['price','positive_rating_ratio']
+all_float_features=['price']
 for column in all_int_features:
     df=df.withColumn(column,df[column].cast(IntegerType()))
 for column in all_float_features:
@@ -110,4 +110,4 @@ def one_hot(dataframe):
 new_df=one_hot(df)
 new_df.show()
 print(new_df.schema.names)
-print(new_df.first()[21])
+print(new_df.first()[22])
