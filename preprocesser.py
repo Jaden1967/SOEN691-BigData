@@ -1,8 +1,9 @@
-
+from pyspark.ml import Pipeline
 from pyspark.sql import *
 from pyspark.sql.functions import udf
 from datetime import date
-from pyspark.sql.types import StringType
+from pyspark.sql.types import StringType, IntegerType, FloatType
+from pyspark.ml.feature import StringIndexer, VectorAssembler, OneHotEncoderEstimator, MinMaxScaler
 
 
 def init_spark():
@@ -32,7 +33,12 @@ def getNumberOfOwners(owners):
     #     exit(1)
     li = map(lambda x : int(x), owners.split('-'))
     return str(int(sum(li)/2))
-    
+def split_features(lines):
+     feature_list=lines.split(";")
+
+     return feature_list
+
+
 originalDataPath = './data/steam.csv'
 unwantedCols1 = ['appid', 'name', 'publisher', 'genres']
 spark = init_spark()
@@ -63,8 +69,45 @@ df = df.drop('owners')
 df.show()
 
 
+all_features=df.schema.names
+all_string_features=['developer','platforms','categories','steamspy_tags']
+all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
+all_float_features=['price','positive_rating_ratio']
+for column in all_int_features:
+    df=df.withColumn(column,df[column].cast(IntegerType()))
+for column in all_float_features:
+    df=df.withColumn(column,df[column].cast(FloatType()))
+#one hot encoding df category
+
+def one_hot(dataframe):
+
+    indexers = [StringIndexer(inputCol=column, outputCol=column + "_index") for column in all_string_features]
+    encoder = OneHotEncoderEstimator(
+        inputCols=[indexer.getOutputCol() for indexer in indexers],
+        outputCols=["{0}_encoded".format(indexer.getOutputCol()) for indexer in indexers]
+    )
+    assembler = VectorAssembler(
+        inputCols=encoder.getOutputCols(),
+        outputCol="cat_features"
+    )
+    # combine all the numberical_feature togeher
+    assembler2=VectorAssembler(
+        inputCols=all_int_features+all_float_features,
+        outputCol="num_features"
+    )
+    pipeline = Pipeline(stages=indexers+[encoder,assembler,assembler2])
+    df_r = pipeline.fit(dataframe).transform(dataframe)
+
+    # scaler = MinMaxScaler(inputCol="num_features", outputCol="scaled_Num_Features")
+    # # Compute summary statistics and generate MinMaxScalerModel
+    # scalerModel = scaler.fit(df_r)
+    # scaledData = scalerModel.transform(df_r)
+    # # print(scaledData.count())
+    return df_r
 
 
 
-
-
+new_df=one_hot(df)
+new_df.show()
+print(new_df.schema.names)
+print(new_df.first()[21])
