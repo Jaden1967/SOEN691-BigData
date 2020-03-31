@@ -1,9 +1,10 @@
-
+from pyspark.ml import Pipeline
 from pyspark.sql import *
-from pyspark.sql.functions import udf, countDistinct
+from pyspark.sql.functions import udf
 from datetime import date
-from pyspark.sql.types import StringType
-from pyspark.ml.feature import OneHotEncoder, StringIndexer
+from pyspark.sql.types import StringType, IntegerType, FloatType
+from pyspark.ml.feature import StringIndexer, VectorAssembler, OneHotEncoderEstimator, MinMaxScaler
+
 
 def init_spark():
     spark = SparkSession \
@@ -32,17 +33,11 @@ def getNumberOfOwners(owners):
     #     exit(1)
     li = map(lambda x : int(x), owners.split('-'))
     return str(int(sum(li)/2))
+def split_features(lines):
+     feature_list=lines.split(";")
 
-def oneHotEncode(df, colName):
-    indexColName = colName + 'index'
-    vecColName = colName + 'Vec'
-    stringIndexer = StringIndexer(inputCol=colName, outputCol=indexColName)
-    model = stringIndexer.fit(df)
-    indexed = model.transform(df)
-    encoder = OneHotEncoder(inputCol=indexColName, outputCol=vecColName)
-    encoder.setDropLast(False)
-    encoded = encoder.transform(indexed)
-    return encoded
+     return feature_list
+
 
 originalDataPath = './data/steam.csv'
 unwantedCols1 = ['appid', 'name', 'publisher', 'genres']
@@ -56,12 +51,14 @@ for it in unwantedCols1:
 udfGetDiffDays = udf(getDiffDays, StringType())
 df = df.withColumn('days', udfGetDiffDays(df.release_date))
 df = df.drop('release_date')
+df.show()
 #add positive rating ratio column
 # df = rdd.map(lambda x : x + (getPositiveRatingRatio(x.positive_ratings, x.negative_ratings),)).toDF(rawData.columns + ['positive_rating_ratio'])
 udfGetPositiveRatingRatio = udf(getPositiveRatingRatio, StringType())
 df = df.withColumn('positive_rating_ratio', udfGetPositiveRatingRatio(df.positive_ratings, df.negative_ratings))
 df = df.drop('positive_ratings')
 df = df.drop('negative_ratings')
+df.show()
 
 #add number_of_owners column
 # rdd = df.rdd
@@ -69,11 +66,48 @@ df = df.drop('negative_ratings')
 udfGetNumberOfOwners = udf(getNumberOfOwners, StringType())
 df = df.withColumn('number_of_owners', udfGetNumberOfOwners(df.owners))
 df = df.drop('owners')
-# df.agg(countDistinct("developer")).show()#17113 developers
-encodedDf = oneHotEncode(df, 'steamspy_tags')
-encodedDf.show()
+df.show()
+
+
+all_features=df.schema.names
+all_string_features=['developer','platforms','categories','steamspy_tags']
+all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
+all_float_features=['price']
+for column in all_int_features:
+    df=df.withColumn(column,df[column].cast(IntegerType()))
+for column in all_float_features:
+    df=df.withColumn(column,df[column].cast(FloatType()))
+#one hot encoding df category
+
+def one_hot(dataframe):
+
+    indexers = [StringIndexer(inputCol=column, outputCol=column + "_index") for column in all_string_features]
+    encoder = OneHotEncoderEstimator(
+        inputCols=[indexer.getOutputCol() for indexer in indexers],
+        outputCols=["{0}_encoded".format(indexer.getOutputCol()) for indexer in indexers]
+    )
+    assembler = VectorAssembler(
+        inputCols=encoder.getOutputCols(),
+        outputCol="cat_features"
+    )
+    # combine all the numberical_feature togeher
+    assembler2=VectorAssembler(
+        inputCols=all_int_features+all_float_features,
+        outputCol="num_features"
+    )
+    pipeline = Pipeline(stages=indexers+[encoder,assembler,assembler2])
+    df_r = pipeline.fit(dataframe).transform(dataframe)
+
+    # scaler = MinMaxScaler(inputCol="num_features", outputCol="scaled_Num_Features")
+    # # Compute summary statistics and generate MinMaxScalerModel
+    # scalerModel = scaler.fit(df_r)
+    # scaledData = scalerModel.transform(df_r)
+    # # print(scaledData.count())
+    return df_r
 
 
 
-
-
+new_df=one_hot(df)
+new_df.show()
+print(new_df.schema.names)
+print(new_df.first()[22])
