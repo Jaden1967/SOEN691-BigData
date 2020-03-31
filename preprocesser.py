@@ -37,13 +37,30 @@ def split_features(lines):
      feature_list=lines.split(";")
 
      return feature_list
+def generateNewRawData(df):
+    
+    def getNumberOfGames(developer):
+        return str(gameFrequency[developer])
+    rdd = df.rdd
+    tup = rdd.groupBy(lambda x : x[4]).collect()
+    gameFrequency = {}
+    for i in tup:
+        gameFrequency[i[0]] = len(i[1])
 
+    
+    #add positive rating ratio column
+    # df = rdd.map(lambda x : x + (getPositiveRatingRatio(x.positive_ratings, x.negative_ratings),)).toDF(rawData.columns + ['positive_rating_ratio'])
+    udfGetNumberOfGames = udf(getNumberOfGames, StringType())
+    df = df.withColumn('developer_products', udfGetNumberOfGames(df.developer))
+    df = df.drop('developer')
+    df.show()
+    df.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save('./data/new_steam.csv')
 
-originalDataPath = './data/steam.csv'
-unwantedCols1 = ['appid', 'name', 'publisher', 'genres']
+originalDataPath = './data/new_steam.csv'
+unwantedCols1 = ['appid', 'name', 'publisher', 'genres', 'categories']
 spark = init_spark()
 df = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True)
-
+# generateNewRawData(df)
 #remove unwanted columns
 for it in unwantedCols1:
     df = df.drop(it)
@@ -69,45 +86,45 @@ df = df.drop('owners')
 df.show()
 
 
-all_features=df.schema.names
-all_string_features=['developer','platforms','categories','steamspy_tags']
-all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
-all_float_features=['price']
-for column in all_int_features:
-    df=df.withColumn(column,df[column].cast(IntegerType()))
-for column in all_float_features:
-    df=df.withColumn(column,df[column].cast(FloatType()))
-#one hot encoding df category
+# all_features=df.schema.names
+# all_string_features=['developer','platforms','categories','steamspy_tags']
+# all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
+# all_float_features=['price']
+# for column in all_int_features:
+#     df=df.withColumn(column,df[column].cast(IntegerType()))
+# for column in all_float_features:
+#     df=df.withColumn(column,df[column].cast(FloatType()))
+# #one hot encoding df category
 
-def one_hot(dataframe):
+# def one_hot(dataframe):
 
-    indexers = [StringIndexer(inputCol=column, outputCol=column + "_index") for column in all_string_features]
-    encoder = OneHotEncoderEstimator(
-        inputCols=[indexer.getOutputCol() for indexer in indexers],
-        outputCols=["{0}_encoded".format(indexer.getOutputCol()) for indexer in indexers]
-    )
-    assembler = VectorAssembler(
-        inputCols=encoder.getOutputCols(),
-        outputCol="cat_features"
-    )
-    # combine all the numberical_feature togeher
-    assembler2=VectorAssembler(
-        inputCols=all_int_features+all_float_features,
-        outputCol="num_features"
-    )
-    pipeline = Pipeline(stages=indexers+[encoder,assembler,assembler2])
-    df_r = pipeline.fit(dataframe).transform(dataframe)
+#     indexers = [StringIndexer(inputCol=column, outputCol=column + "_index") for column in all_string_features]
+#     encoder = OneHotEncoderEstimator(
+#         inputCols=[indexer.getOutputCol() for indexer in indexers],
+#         outputCols=["{0}_encoded".format(indexer.getOutputCol()) for indexer in indexers]
+#     )
+#     assembler = VectorAssembler(
+#         inputCols=encoder.getOutputCols(),
+#         outputCol="cat_features"
+#     )
+#     # combine all the numberical_feature togeher
+#     assembler2=VectorAssembler(
+#         inputCols=all_int_features+all_float_features,
+#         outputCol="num_features"
+#     )
+#     pipeline = Pipeline(stages=indexers+[encoder,assembler,assembler2])
+#     df_r = pipeline.fit(dataframe).transform(dataframe)
 
-    # scaler = MinMaxScaler(inputCol="num_features", outputCol="scaled_Num_Features")
-    # # Compute summary statistics and generate MinMaxScalerModel
-    # scalerModel = scaler.fit(df_r)
-    # scaledData = scalerModel.transform(df_r)
-    # # print(scaledData.count())
-    return df_r
+#     # scaler = MinMaxScaler(inputCol="num_features", outputCol="scaled_Num_Features")
+#     # # Compute summary statistics and generate MinMaxScalerModel
+#     # scalerModel = scaler.fit(df_r)
+#     # scaledData = scalerModel.transform(df_r)
+#     # # print(scaledData.count())
+#     return df_r
 
 
 
-new_df=one_hot(df)
-new_df.show()
-print(new_df.schema.names)
-print(new_df.first()[22])
+# new_df=one_hot(df)
+# new_df.show()
+# print(new_df.schema.names)
+# print(new_df.first()[22])
