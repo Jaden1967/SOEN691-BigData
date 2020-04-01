@@ -1,7 +1,7 @@
 from pyspark.ml import Pipeline
 from pyspark.shell import sqlContext, sc
 from pyspark.sql import *
-from pyspark.sql.functions import udf
+from pyspark.sql.functions import udf, col
 from datetime import date
 from pyspark.sql.types import StringType, StringType, FloatType
 from pyspark.ml.feature import StringIndexer, VectorAssembler, OneHotEncoderEstimator, MinMaxScaler
@@ -55,7 +55,7 @@ def generateNewRawData(df):
     udfGetNumberOfGames = udf(getNumberOfGames, StringType())
     df = df.withColumn('developer_products', udfGetNumberOfGames(df.developer))
     df = df.drop('developer')
-    df.show()
+    # df.show()
     df.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save('./data/new_steam.csv')
 def generateTagSet(df):
     tagSet = []
@@ -77,29 +77,32 @@ def isintheset(all_label,string):
       return 1
     else:
       return 0
-def generateCatColumns(df, li, col):
-    iterCat = None
-    def isInTheSet(all_label):
+def generateCatColumns(df, li, colName):
+    # iterCat = None
+    def isInTheSet(all_label, cat):
         stringlist=all_label.split(";")
-        if iterCat in stringlist:
-            return 1
+        # print(iterCat)
+        if cat in stringlist:
+            return '1'
         else:
-            return 0
-    udfIsInTheSet = udf(isInTheSet, StringType())
+            return '0'
+    def udf_helper(label_list):
+        return udf(lambda l: isInTheSet(l, label_list))
+    
     
     for cat in li:
-        iterCat = cat
-        print(iterCat)
-        df = df.withColumn(cat, udfIsInTheSet(col))
+        # iterCat = cat
+        # print(iterCat)
+        # df = df.withColumn(cat, udfIsInTheSet(df[col]))
+        df = df.withColumn(cat, udf_helper(cat)(col(colName)))
     return df
 def xiyun(df):
     with open('./data/steamspy_tags.csv') as file:
          readCSV = csv.reader(file, delimiter=',')
          for row in readCSV:
              tag_set=row
-
-    df = generateCatColumns(df, tag_set, df.steamspy_tags)
-    df = generateCatColumns(df, ['windows','mac','linux'], df.platforms)
+    df = generateCatColumns(df, tag_set, 'steamspy_tags')
+    df = generateCatColumns(df, ['windows','mac','linux'], 'platforms')
     df.show()
 
 def generate_dataset():
@@ -181,14 +184,14 @@ def preprocess(df):
     udfGetDiffDays = udf(getDiffDays, StringType())
     df = df.withColumn('days', udfGetDiffDays(df.release_date))
     df = df.drop('release_date')
-    df.show()
+    # df.show()
     #add positive rating ratio column
     # df = rdd.map(lambda x : x + (getPositiveRatingRatio(x.positive_ratings, x.negative_ratings),)).toDF(rawData.columns + ['positive_rating_ratio'])
     udfGetPositiveRatingRatio = udf(getPositiveRatingRatio, StringType())
     df = df.withColumn('positive_rating_ratio', udfGetPositiveRatingRatio(df.positive_ratings, df.negative_ratings))
     df = df.drop('positive_ratings')
     df = df.drop('negative_ratings')
-    df.show()
+    # df.show()
 
     #add number_of_owners column
     # rdd = df.rdd
@@ -196,7 +199,7 @@ def preprocess(df):
     udfGetNumberOfOwners = udf(getNumberOfOwners, StringType())
     df = df.withColumn('number_of_owners', udfGetNumberOfOwners(df.owners))
     df = df.drop('owners')
-    df.show()
+    # df.show()
     xiyun(df)
 
 
