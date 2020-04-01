@@ -3,7 +3,7 @@ from pyspark.shell import sqlContext, sc
 from pyspark.sql import *
 from pyspark.sql.functions import udf
 from datetime import date
-from pyspark.sql.types import StringType, IntegerType, FloatType
+from pyspark.sql.types import StringType, StringType, FloatType
 from pyspark.ml.feature import StringIndexer, VectorAssembler, OneHotEncoderEstimator, MinMaxScaler
 import csv
 
@@ -82,9 +82,9 @@ def generateCatColumns(df, li, col):
     def isInTheSet(all_label):
         stringlist=all_label.split(";")
         if iterCat in stringlist:
-            return '1'
+            return 1
         else:
-            return '0'
+            return 0
     udfIsInTheSet = udf(isInTheSet, StringType())
     
     for cat in li:
@@ -205,7 +205,7 @@ def preprocess(df):
     # all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
     # all_float_features=['price']
     # for column in all_int_features:
-    #     df=df.withColumn(column,df[column].cast(IntegerType()))
+    #     df=df.withColumn(column,df[column].cast(StringType()))
     # for column in all_float_features:
     #     df=df.withColumn(column,df[column].cast(FloatType()))
     # #one hot encoding df category
