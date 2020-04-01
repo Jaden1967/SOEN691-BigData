@@ -4,6 +4,7 @@ from pyspark.sql.functions import udf
 from datetime import date
 from pyspark.sql.types import StringType, IntegerType, FloatType
 from pyspark.ml.feature import StringIndexer, VectorAssembler, OneHotEncoderEstimator, MinMaxScaler
+import csv
 
 
 def init_spark():
@@ -55,12 +56,27 @@ def generateNewRawData(df):
     df = df.drop('developer')
     df.show()
     df.repartition(1).write.format("com.databricks.spark.csv").option("header", "true").save('./data/new_steam.csv')
+def generateTagSet(df):
+    tagSet = []
+    tags_list = df.rdd.map(lambda x : x.steamspy_tags).collect()
+    print(tags_list)
+    for tags in tags_list:
+        for tag in tags.split(';'):
+            if tag not in tagSet:
+                tagSet.append(tag)
+
+    print(tagSet)
+    with open('./data/steamspy_tags.csv', 'w', newline='') as myfile:
+     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+     wr.writerow(tagSet)
+
 
 originalDataPath = './data/new_steam.csv'
 unwantedCols1 = ['appid', 'name', 'publisher', 'genres', 'categories']
 spark = init_spark()
 df = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True)
 # generateNewRawData(df)
+# generateTagSet(df)
 #remove unwanted columns
 for it in unwantedCols1:
     df = df.drop(it)
