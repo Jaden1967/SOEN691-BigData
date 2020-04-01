@@ -72,82 +72,106 @@ def generateTagSet(df):
      wr.writerow(tagSet)
 
 def isintheset(all_label,string):
-    stringlist=all_label.split(";")
+    stringlist = all_label.split(";")
     if string in stringlist:
       return 1
     else:
       return 0
+def generateCatColumns(df, li, col):
+    iterCat = None
+    def isInTheSet(all_label):
+        stringlist=all_label.split(";")
+        if iterCat in stringlist:
+            return '1'
+        else:
+            return '0'
+    udfIsInTheSet = udf(isInTheSet, StringType())
+    
+    for cat in li:
+        iterCat = cat
+        print(iterCat)
+        df = df.withColumn(cat, udfIsInTheSet(col))
+    return df
+def xiyun(df):
+    with open('./data/steamspy_tags.csv') as file:
+         readCSV = csv.reader(file, delimiter=',')
+         for row in readCSV:
+             tag_set=row
 
+    df = generateCatColumns(df, tag_set, df.steamspy_tags)
+    df = generateCatColumns(df, ['windows','mac','linux'], df.platforms)
+    df.show()
 
 def generate_dataset():
   global training
   global testing
 
-  for i in range(0,2):
-     if i==0:
-         dataframe=training
-     else:
-         dataframe=testing
-    #get all feature[]
-     with open('./data/steamspy_tags.csv') as file:
-         readCSV = csv.reader(file, delimiter=',')
-         for row in readCSV:
-             tag_set=row
+#   for i in range(0,2):
+#      if i==0:
+#          dataframe=training
+#      else:
+#          dataframe=testing
+#     #get all feature[]
+#      with open('./data/steamspy_tags.csv') as file:
+#          readCSV = csv.reader(file, delimiter=',')
+#          for row in readCSV:
+#              tag_set=row
 
-     plat_forms=['windows','mac','linux']
-     tempodf=[]
+#      plat_forms=['windows','mac','linux']
+#      tempodf=[]
 
-     #one hot encoder manually
-     for feature in tag_set:
-         for i in range(0,dataframe.count()):
-             tempodf.append(feature)
-         rdd1 = sc.parallelize(tempodf)
-         row_rdd = rdd1.map(lambda x: Row(x)).zipWithIndex()
-         df = sqlContext.createDataFrame(row_rdd, [feature])
+#      #one hot encoder manually
+#      for feature in tag_set:
+#          for i in range(0,dataframe.count()):
+#              tempodf.append(feature)
+#          rdd1 = sc.parallelize(tempodf)
+#          row_rdd = rdd1.map(lambda x: Row(x)).zipWithIndex()
+#          df = sqlContext.createDataFrame(row_rdd, [feature])
 
-         dataframe=dataframe.join(df, df.columns[-1]==dataframe.columns[-1], how='right')
-         tempodf.clear()
+#          dataframe=dataframe.join(df, df.columns[-1]==dataframe.columns[-1], how='right')
+#          tempodf.clear()
 
-     for plat_form in plat_forms:
-         for i in range(0,dataframe.count()):
-             tempodf.append(plat_form)
-         rdd1 = sc.parallelize(tempodf)
-         row_rdd = rdd1.map(lambda x: Row(x))
-         df = sqlContext.createDataFrame(row_rdd, [plat_form])
-         dataframe=dataframe.withColumn(plat_form,df.select(plat_form))
-         tempodf.clear()
-
-
-     udfisIndataset = udf(isintheset, StringType())
-
-     for feature in tag_set:
-
-        dataframe = dataframe.withColumn(feature+'_encoder', udfisIndataset(dataframe.steamspy_tags, dataframe.feature))
-        dataframe = dataframe.drop(feature)
+#      for plat_form in plat_forms:
+#          for i in range(0,dataframe.count()):
+#              tempodf.append(plat_form)
+#          rdd1 = sc.parallelize(tempodf)
+#          row_rdd = rdd1.map(lambda x: Row(x))
+#          df = sqlContext.createDataFrame(row_rdd, [plat_form])
+#          dataframe=dataframe.withColumn(plat_form,df.select(plat_form))
+#          tempodf.clear()
 
 
-     for plat_form in plat_forms:
-         dataframe = dataframe.withColumn(plat_form + '_encoder',udfisIndataset(dataframe.platforms, dataframe.platform))
-         dataframe = dataframe.drop(plat_form)
+#      udfisIndataset = udf(isintheset, StringType())
+
+#      for feature in tag_set:
+
+#         dataframe = dataframe.withColumn(feature+'_encoder', udfisIndataset(dataframe.steamspy_tags, dataframe.feature))
+#         dataframe = dataframe.drop(feature)
 
 
-     #######pipline: add feature vector#####
+#      for plat_form in plat_forms:
+#          dataframe = dataframe.withColumn(plat_form + '_encoder',udfisIndataset(dataframe.platforms, dataframe.platform))
+#          dataframe = dataframe.drop(plat_form)
 
-     all_features=dataframe.schema.names
-     Assember= VectorAssembler(
-             inputCols=all_features,
-             outputCol="all_features")
-     pipline=Pipeline(stages=all_features+[Assember])
-     if i ==0:
-      training_df= pipline.fit(dataframe).transform(dataframe)
-     else:
-      testing_df= pipline.fit(dataframe).transform(dataframe)
 
-  return preprocess(training_df) ,preprocess(testing_df)
+#      #######pipline: add feature vector#####
+
+#      all_features=dataframe.schema.names
+#      Assember= VectorAssembler(
+#              inputCols=all_features,
+#              outputCol="all_features")
+#      pipline=Pipeline(stages=all_features+[Assember])
+#      if i ==0:
+#       training_df= pipline.fit(dataframe).transform(dataframe)
+#      else:
+#       testing_df= pipline.fit(dataframe).transform(dataframe)
+
+  return preprocess(training) ,preprocess(testing)
 
 
 # generateNewRawData(df)
 # generateTagSet(df)
+
 def preprocess(df):
     global unwantedCols
     #remove unwanted columns
@@ -173,6 +197,7 @@ def preprocess(df):
     df = df.withColumn('number_of_owners', udfGetNumberOfOwners(df.owners))
     df = df.drop('owners')
     df.show()
+    xiyun(df)
 
 
     # all_features=df.schema.names
@@ -222,3 +247,4 @@ originalDataPath = './data/new_steam.csv'
 unwantedCols = ['appid', 'name', 'publisher', 'genres', 'categories']
 spark = init_spark()
 training, testing = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True).randomSplit([0.9, 0.1])
+generate_dataset()

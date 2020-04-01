@@ -5,6 +5,8 @@ from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.regression import LinearRegression
 
 def predict(algorithm, paramGrid):
+    global training
+    global testing
     pipeline = Pipeline(stages=[algorithm])
     crossval = CrossValidator(estimator=pipeline,
                             estimatorParamMaps=paramGrid,
