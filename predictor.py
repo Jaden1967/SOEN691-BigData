@@ -29,3 +29,7 @@ lr = LogisticRegression(featuresCol='features', lableCol='positive_rating_ratio'
 paramGrid = ParamGridBuilder().addGrid(lr.regParam, [0.5, 0.3, 0.1, 0.05, 0.01]).build()
 predict(lr, paramGrid)
 
+#random forest regression
+
+#KNN regression
+
