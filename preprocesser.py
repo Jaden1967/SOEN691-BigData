@@ -1,4 +1,5 @@
 from pyspark.ml import Pipeline
+from pyspark.shell import sqlContext, sc
 from pyspark.sql import *
 from pyspark.sql.functions import udf
 from datetime import date
@@ -70,12 +71,79 @@ def generateTagSet(df):
      wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
      wr.writerow(tagSet)
 
+def isintheset(all_label,string):
+    stringlist=all_label.split(";")
+    if string in stringlist:
+      return 1
+    else:
+      return 0
 
 
 def generate_dataset():
-    global training
-    global testing
-    return preprocess(training), preprocess(testing)
+  global training
+  global testing
+
+  for i in range(0,2):
+     if i==0:
+         dataframe=training
+     else:
+         dataframe=testing
+    #get all feature[]
+     with open('./data/steamspy_tags.csv') as file:
+         readCSV = csv.reader(file, delimiter=',')
+         for row in readCSV:
+             tag_set=row
+
+     plat_forms=['windows','mac','linux']
+     tempodf=[]
+
+     #one hot encoder manually
+     for feature in tag_set:
+         for i in range(0,dataframe.count()):
+             tempodf.append(feature)
+         rdd1 = sc.parallelize(tempodf)
+         row_rdd = rdd1.map(lambda x: Row(x)).zipWithIndex()
+         df = sqlContext.createDataFrame(row_rdd, [feature])
+
+         dataframe=dataframe.join(df, df.columns[-1]==dataframe.columns[-1], how='right')
+         tempodf.clear()
+
+     for plat_form in plat_forms:
+         for i in range(0,dataframe.count()):
+             tempodf.append(plat_form)
+         rdd1 = sc.parallelize(tempodf)
+         row_rdd = rdd1.map(lambda x: Row(x))
+         df = sqlContext.createDataFrame(row_rdd, [plat_form])
+         dataframe=dataframe.withColumn(plat_form,df.select(plat_form))
+         tempodf.clear()
+
+
+     udfisIndataset = udf(isintheset, StringType())
+
+     for feature in tag_set:
+
+        dataframe = dataframe.withColumn(feature+'_encoder', udfisIndataset(dataframe.steamspy_tags, dataframe.feature))
+        dataframe = dataframe.drop(feature)
+
+
+     for plat_form in plat_forms:
+         dataframe = dataframe.withColumn(plat_form + '_encoder',udfisIndataset(dataframe.platforms, dataframe.platform))
+         dataframe = dataframe.drop(plat_form)
+
+
+     #######pipline: add feature vector#####
+
+     all_features=dataframe.schema.names
+     Assember= VectorAssembler(
+             inputCols=all_features,
+             outputCol="all_features")
+     pipline=Pipeline(stages=all_features+[Assember])
+     if i ==0:
+      training_df= pipline.fit(dataframe).transform(dataframe)
+     else:
+      testing_df= pipline.fit(dataframe).transform(dataframe)
+
+  return preprocess(training_df) ,preprocess(testing_df)
 
 
 # generateNewRawData(df)
