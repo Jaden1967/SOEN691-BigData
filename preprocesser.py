@@ -71,76 +71,86 @@ def generateTagSet(df):
      wr.writerow(tagSet)
 
 
-originalDataPath = './data/new_steam.csv'
-unwantedCols1 = ['appid', 'name', 'publisher', 'genres', 'categories']
-spark = init_spark()
-df = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True)
+
+def generate_dataset():
+    global training
+    global testing
+    return preprocess(training), preprocess(testing)
+
+
 # generateNewRawData(df)
 # generateTagSet(df)
-#remove unwanted columns
-for it in unwantedCols1:
-    df = df.drop(it)
-#add days column
-udfGetDiffDays = udf(getDiffDays, StringType())
-df = df.withColumn('days', udfGetDiffDays(df.release_date))
-df = df.drop('release_date')
-df.show()
-#add positive rating ratio column
-# df = rdd.map(lambda x : x + (getPositiveRatingRatio(x.positive_ratings, x.negative_ratings),)).toDF(rawData.columns + ['positive_rating_ratio'])
-udfGetPositiveRatingRatio = udf(getPositiveRatingRatio, StringType())
-df = df.withColumn('positive_rating_ratio', udfGetPositiveRatingRatio(df.positive_ratings, df.negative_ratings))
-df = df.drop('positive_ratings')
-df = df.drop('negative_ratings')
-df.show()
+def preprocess(df):
+    global unwantedCols
+    #remove unwanted columns
+    for it in unwantedCols:
+        df = df.drop(it)
+    #add days column
+    udfGetDiffDays = udf(getDiffDays, StringType())
+    df = df.withColumn('days', udfGetDiffDays(df.release_date))
+    df = df.drop('release_date')
+    df.show()
+    #add positive rating ratio column
+    # df = rdd.map(lambda x : x + (getPositiveRatingRatio(x.positive_ratings, x.negative_ratings),)).toDF(rawData.columns + ['positive_rating_ratio'])
+    udfGetPositiveRatingRatio = udf(getPositiveRatingRatio, StringType())
+    df = df.withColumn('positive_rating_ratio', udfGetPositiveRatingRatio(df.positive_ratings, df.negative_ratings))
+    df = df.drop('positive_ratings')
+    df = df.drop('negative_ratings')
+    df.show()
 
-#add number_of_owners column
-# rdd = df.rdd
-# df = rdd.map(lambda x : x + (getNumberOfOwners(x.owners),)).toDF(rawData.columns + ['number_of_owners'])
-udfGetNumberOfOwners = udf(getNumberOfOwners, StringType())
-df = df.withColumn('number_of_owners', udfGetNumberOfOwners(df.owners))
-df = df.drop('owners')
-df.show()
-
-
-# all_features=df.schema.names
-# all_string_features=['developer','platforms','categories','steamspy_tags']
-# all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
-# all_float_features=['price']
-# for column in all_int_features:
-#     df=df.withColumn(column,df[column].cast(IntegerType()))
-# for column in all_float_features:
-#     df=df.withColumn(column,df[column].cast(FloatType()))
-# #one hot encoding df category
-
-# def one_hot(dataframe):
-
-#     indexers = [StringIndexer(inputCol=column, outputCol=column + "_index") for column in all_string_features]
-#     encoder = OneHotEncoderEstimator(
-#         inputCols=[indexer.getOutputCol() for indexer in indexers],
-#         outputCols=["{0}_encoded".format(indexer.getOutputCol()) for indexer in indexers]
-#     )
-#     assembler = VectorAssembler(
-#         inputCols=encoder.getOutputCols(),
-#         outputCol="cat_features"
-#     )
-#     # combine all the numberical_feature togeher
-#     assembler2=VectorAssembler(
-#         inputCols=all_int_features+all_float_features,
-#         outputCol="num_features"
-#     )
-#     pipeline = Pipeline(stages=indexers+[encoder,assembler,assembler2])
-#     df_r = pipeline.fit(dataframe).transform(dataframe)
-
-#     # scaler = MinMaxScaler(inputCol="num_features", outputCol="scaled_Num_Features")
-#     # # Compute summary statistics and generate MinMaxScalerModel
-#     # scalerModel = scaler.fit(df_r)
-#     # scaledData = scalerModel.transform(df_r)
-#     # # print(scaledData.count())
-#     return df_r
+    #add number_of_owners column
+    # rdd = df.rdd
+    # df = rdd.map(lambda x : x + (getNumberOfOwners(x.owners),)).toDF(rawData.columns + ['number_of_owners'])
+    udfGetNumberOfOwners = udf(getNumberOfOwners, StringType())
+    df = df.withColumn('number_of_owners', udfGetNumberOfOwners(df.owners))
+    df = df.drop('owners')
+    df.show()
 
 
+    # all_features=df.schema.names
+    # all_string_features=['developer','platforms','categories','steamspy_tags']
+    # all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
+    # all_float_features=['price']
+    # for column in all_int_features:
+    #     df=df.withColumn(column,df[column].cast(IntegerType()))
+    # for column in all_float_features:
+    #     df=df.withColumn(column,df[column].cast(FloatType()))
+    # #one hot encoding df category
 
-# new_df=one_hot(df)
-# new_df.show()
-# print(new_df.schema.names)
-# print(new_df.first()[22])
+    # def one_hot(dataframe):
+
+    #     indexers = [StringIndexer(inputCol=column, outputCol=column + "_index") for column in all_string_features]
+    #     encoder = OneHotEncoderEstimator(
+    #         inputCols=[indexer.getOutputCol() for indexer in indexers],
+    #         outputCols=["{0}_encoded".format(indexer.getOutputCol()) for indexer in indexers]
+    #     )
+    #     assembler = VectorAssembler(
+    #         inputCols=encoder.getOutputCols(),
+    #         outputCol="cat_features"
+    #     )
+    #     # combine all the numberical_feature togeher
+    #     assembler2=VectorAssembler(
+    #         inputCols=all_int_features+all_float_features,
+    #         outputCol="num_features"
+    #     )
+    #     pipeline = Pipeline(stages=indexers+[encoder,assembler,assembler2])
+    #     df_r = pipeline.fit(dataframe).transform(dataframe)
+
+    #     # scaler = MinMaxScaler(inputCol="num_features", outputCol="scaled_Num_Features")
+    #     # # Compute summary statistics and generate MinMaxScalerModel
+    #     # scalerModel = scaler.fit(df_r)
+    #     # scaledData = scalerModel.transform(df_r)
+    #     # # print(scaledData.count())
+    #     return df_r
+
+
+
+    # new_df=one_hot(df)
+    # new_df.show()
+    # print(new_df.schema.names)
+    # print(new_df.first()[22])
+
+originalDataPath = './data/new_steam.csv'
+unwantedCols = ['appid', 'name', 'publisher', 'genres', 'categories']
+spark = init_spark()
+training, testing = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True).randomSplit([0.9, 0.1])
