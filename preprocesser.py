@@ -191,7 +191,7 @@ def preprocess(df):
          for row in readCSV:
              tag_set=row
     ##2。5D 有问题
-    tag_set.remove('2.5D')
+    # tag_set.remove('2.5D')
     udfcol=['mac','windows','linux']+tag_set+['days','number_of_owners']
     original_int_features = ['english', 'required_age', 'achievements', 'average_playtime', 'median_playtime']
     all_float_features = ['price']
@@ -252,4 +252,3 @@ originalDataPath = './data/new_steam.csv'
 unwantedCols = ['appid', 'name', 'publisher', 'genres', 'categories']
 spark = init_spark()
 training, testing = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True).randomSplit([0.9, 0.1])
-generate_dataset()
