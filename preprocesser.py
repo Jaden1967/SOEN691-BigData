@@ -191,7 +191,7 @@ def preprocess(df):
          for row in readCSV:
              tag_set=row
     ##2。5D 有问题
-    tag_set.remove('2.5D')
+    # tag_set.remove('2.5D')
     udfcol=['mac','windows','linux']+tag_set+['days','number_of_owners']
     original_int_features = ['english', 'required_age', 'achievements', 'average_playtime', 'median_playtime']
     all_float_features = ['price']
@@ -203,7 +203,9 @@ def preprocess(df):
           outputCol="features")
     pipline=Pipeline(stages=[assember])
     df_new=pipline.fit(df).transform(df)
+    # df_new.show()
     df_new=df_new.select('features','positive_rating_ratio')
+    # df_new.show()
     return df_new
 
     # all_features=df.schema.names
