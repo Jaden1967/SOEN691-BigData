@@ -254,4 +254,3 @@ originalDataPath = './data/new_steam.csv'
 unwantedCols = ['appid', 'name', 'publisher', 'genres', 'categories']
 spark = init_spark()
 training, testing = spark.read.option("quote", "\"").option("escape", "\"").csv(originalDataPath, header=True).randomSplit([0.9, 0.1])
-generate_dataset()
