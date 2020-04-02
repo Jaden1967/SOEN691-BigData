@@ -28,7 +28,7 @@ def predict(algorithm, paramGrid):
 training, testing = generate_dataset()
 
 #linear regression
-lr = LinearRegression(featuresCol='features', lableCol='positive_rating_ratio', maxIter=10)
+lr = LinearRegression(featuresCol='features', labelCol='positive_rating_ratio', maxIter=10)
 paramGrid = ParamGridBuilder().addGrid(lr.regParam, [0.5, 0.3, 0.1, 0.05, 0.01]) \
     .addGrid(lr.elasticNetParam, [0.3, 0.8]) \
     .build()

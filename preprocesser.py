@@ -3,7 +3,7 @@ from pyspark.shell import sqlContext, sc
 from pyspark.sql import *
 from pyspark.sql.functions import udf, col
 from datetime import date
-from pyspark.sql.types import StringType, StringType, FloatType
+from pyspark.sql.types import StringType, StringType, FloatType, IntegerType
 from pyspark.ml.feature import StringIndexer, VectorAssembler, OneHotEncoderEstimator, MinMaxScaler
 import csv
 
@@ -103,7 +103,7 @@ def xiyun(df):
              tag_set=row
     df = generateCatColumns(df, tag_set, 'steamspy_tags')
     df = generateCatColumns(df, ['windows','mac','linux'], 'platforms')
-    df.show()
+    return df
 
 def generate_dataset():
   global training
@@ -123,25 +123,6 @@ def generate_dataset():
 #      plat_forms=['windows','mac','linux']
 #      tempodf=[]
 
-#      #one hot encoder manually
-#      for feature in tag_set:
-#          for i in range(0,dataframe.count()):
-#              tempodf.append(feature)
-#          rdd1 = sc.parallelize(tempodf)
-#          row_rdd = rdd1.map(lambda x: Row(x)).zipWithIndex()
-#          df = sqlContext.createDataFrame(row_rdd, [feature])
-
-#          dataframe=dataframe.join(df, df.columns[-1]==dataframe.columns[-1], how='right')
-#          tempodf.clear()
-
-#      for plat_form in plat_forms:
-#          for i in range(0,dataframe.count()):
-#              tempodf.append(plat_form)
-#          rdd1 = sc.parallelize(tempodf)
-#          row_rdd = rdd1.map(lambda x: Row(x))
-#          df = sqlContext.createDataFrame(row_rdd, [plat_form])
-#          dataframe=dataframe.withColumn(plat_form,df.select(plat_form))
-#          tempodf.clear()
 
 
 #      udfisIndataset = udf(isintheset, StringType())
@@ -172,6 +153,7 @@ def generate_dataset():
   return preprocess(training) ,preprocess(testing)
 
 
+
 # generateNewRawData(df)
 # generateTagSet(df)
 
@@ -200,13 +182,33 @@ def preprocess(df):
     df = df.withColumn('number_of_owners', udfGetNumberOfOwners(df.owners))
     df = df.drop('owners')
     # df.show()
-    xiyun(df)
-
+    #########one hot manually####
+    df=xiyun(df)
+    # df.show()
+    ###all feature to number###
+    with open('./data/steamspy_tags.csv') as file:
+         readCSV = csv.reader(file, delimiter=',')
+         for row in readCSV:
+             tag_set=row
+    ##2。5D 有问题
+    tag_set.remove('2.5D')
+    udfcol=['mac','windows','linux']+tag_set+['days','number_of_owners']
+    original_int_features = ['english', 'required_age', 'achievements', 'average_playtime', 'median_playtime']
+    all_float_features = ['price']
+    for col in udfcol+original_int_features:
+        df = df.withColumn(col, df[col].cast(IntegerType()))
+    df=df.withColumn('positive_rating_ratio',df['positive_rating_ratio'].cast(FloatType()))
+    df=df.withColumn('price',df['price'].cast(FloatType()))
+    assember=VectorAssembler(inputCols=udfcol+original_int_features+all_float_features,
+          outputCol="features")
+    pipline=Pipeline(stages=[assember])
+    df_new=pipline.fit(df).transform(df)
+    df_new=df_new.select('features','positive_rating_ratio')
+    return df_new
 
     # all_features=df.schema.names
     # all_string_features=['developer','platforms','categories','steamspy_tags']
-    # all_int_features=['english','required_age','achievements', 'average_playtime', 'median_playtime', 'days',  'number_of_owners']
-    # all_float_features=['price']
+
     # for column in all_int_features:
     #     df=df.withColumn(column,df[column].cast(StringType()))
     # for column in all_float_features:
