@@ -11,7 +11,7 @@ def predict(algorithm, paramGrid):
     crossval = CrossValidator(estimator=pipeline,
                             estimatorParamMaps=paramGrid,
                             evaluator=RegressionEvaluator(labelCol='positive_rating_ratio'),
-                            numFolds=2)#TODO:5 folds
+                            numFolds=5)#TODO:5 folds
     # Run cross-validation, and choose the best set of parameters.
     model = crossval.fit(training)
     # if isinstance(algorithm, LinearRegression):
@@ -30,7 +30,7 @@ training, testing = generate_dataset()
 #linear regression
 lr = LinearRegression(featuresCol='features', labelCol='positive_rating_ratio', maxIter=10)
 paramGrid = ParamGridBuilder().addGrid(lr.regParam, [0.5, 0.3, 0.1, 0.05, 0.01]) \
-    .addGrid(lr.elasticNetParam, [0.3]).build()#TODO:add more param for elastic
+    .addGrid(lr.elasticNetParam, [0.3, 0.5]).build()#TODO:add more param for elastic
 predict(lr, paramGrid)
 
 #random forest regression
