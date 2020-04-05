@@ -278,7 +278,7 @@ def RF_Algorithm(data):
     training, testing = data.randomSplit([0.9, 0.1])
     tr, te = generate_dataset()
 
-    rf = RandomForestRegressor(featuresCol="indexedFeatures",labelCol='positive_rating_ratio')
+    rf = RandomForestRegressor(featuresCol="features",labelCol='positive_rating_ratio')
     # Chain indexer and forest in a Pipeline
     pipeline = Pipeline(stages=[featureIndexer, rf])
     # Train model.  This also runs the indexer.
@@ -321,7 +321,7 @@ def DT_Algorithm(data):
     tr, te = generate_dataset()
 
     # Train a DecisionTree model.
-    dt = DecisionTreeRegressor(featuresCol="indexedFeatures",labelCol='positive_rating_ratio')
+    dt = DecisionTreeRegressor(featuresCol="features",labelCol='positive_rating_ratio')
     # Chain indexer and tree in a Pipeline
     pipeline = Pipeline(stages=[featureIndexer, dt])
     # Train model.  This also runs the indexer.
