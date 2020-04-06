@@ -3,7 +3,7 @@ from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
 from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.regression import LinearRegression, DecisionTreeRegressor, GBTRegressor, RandomForestRegressor
-from pyspark_knn.ml.regression import KNNRegression
+# from pyspark_knn.ml.regression import KNNRegression
 
 def predict(algorithm, paramGrid):
     global training
@@ -60,9 +60,9 @@ paramGrid = ParamGridBuilder().addGrid(gbt.maxDepth, [5, 10, 30]) \
     .addGrid(gbt.maxIter, [10, 20, 30]).build()
 predict(gbt, paramGrid)
 
-#KNN
-#这部分的setup还有问题
-print("------------------------------------KNN-----------------------------------")
-knn = KNNRegression(featuresCol="features", labelCol="positive_rating_ratio")
-paramGrid = ParamGridBuilder().addGrid(knn.topTreeSize, [1000, 2000]).build()
-predict(knn, paramGrid)
+# #KNN
+# #这部分的setup还有问题
+# print("------------------------------------KNN-----------------------------------")
+# knn = KNNRegression(featuresCol="features", labelCol="positive_rating_ratio")
+# paramGrid = ParamGridBuilder().addGrid(knn.topTreeSize, [1000, 2000]).build()
+# predict(knn, paramGrid)
