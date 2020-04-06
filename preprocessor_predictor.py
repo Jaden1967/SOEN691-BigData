@@ -14,6 +14,12 @@ from pyspark.ml.feature import VectorIndexer
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.regression import DecisionTreeRegressor
 from pyspark.ml.regression import GBTRegressor
+from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.neighbors import KNeighborsRegressor
+import numpy as np
+from sklearn.model_selection import train_test_split
+import mglearn
+from math import sqrt
 
 def init_spark():
     spark = SparkSession \
@@ -156,22 +162,24 @@ def preprocess(df):
     return df_new
 
 
-def predict(tr,te,algorithm, paramGrid):
-    pipeline = Pipeline(stages=[algorithm])
+def predict(tr,te,pipeline, paramGrid,linear):
     crossval = CrossValidator(estimator=pipeline,
                             estimatorParamMaps=paramGrid,
                             evaluator=RegressionEvaluator(labelCol='positive_rating_ratio'),
                             numFolds=5)#TODO:5 folds
     # Run cross-validation, and choose the best set of parameters.
     model = crossval.fit(tr)
-    print("Coefficients: " + str(model.bestModel.stages[-1].coefficients))
+    if(linear):
+        print("Model coefficients: " + str(model.bestModel.stages[-1].coefficients))
+    else:
+        print("Model coefficients: ", model.bestModel.stages[1])
     #make prediction
     predictions =model.transform(te)
     #print prediction samples
     predictions.select("features", "positive_rating_ratio", "prediction").show(10)
     #evaluate rmse
     evaluator = RegressionEvaluator(predictionCol="prediction", labelCol="positive_rating_ratio",metricName="rmse")
-    print("rmse on test data = %g" % evaluator.evaluate(predictions))
+    print("Root Mean Squared Error (RMSE) on test data = %g" % evaluator.evaluate(predictions))
 
 # Linear Regression
 def linear(tr,te):
@@ -179,27 +187,18 @@ def linear(tr,te):
     paramGrid = ParamGridBuilder().addGrid(lr.regParam, [0.5, 0.3, 0.1, 0.05, 0.01]) \
         .addGrid(lr.elasticNetParam, [0.3, 0.5]).build()  # TODO:add more param for elastic
     print("---------------------Linear Regression---------------------")
-    predict(tr,te,lr, paramGrid)
+    pipeline = Pipeline(stages=[lr])
+    predict(tr, te, pipeline, paramGrid, True)
 
 # Random Forest Regression
 def RF_Algorithm(tr,te,featureIndexer):
     rf = RandomForestRegressor(featuresCol="indexedFeatures",labelCol='positive_rating_ratio')
     # Chain indexer and forest in a Pipeline
     pipeline = Pipeline(stages=[featureIndexer, rf])
-    # Train model.  This also runs the indexer.
-    model = pipeline.fit(tr)
-
-    # Make predictions.
-    predictions = model.transform(te)
-    # Select example rows to display.
     print("---------------------Random Forest Regression---------------------")
-    predictions.select("features", "positive_rating_ratio", "prediction").show(10)
-    # Select (prediction, true label) and compute test error
-    evaluator = RegressionEvaluator(labelCol="positive_rating_ratio", predictionCol="prediction", metricName="rmse")
-    rmse = evaluator.evaluate(predictions)
-    print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
-    rfModel = model.stages[1]
-    print(rfModel)  # summary only
+    paramGrid = ParamGridBuilder().addGrid(rf.maxDepth, [5, 10, 15]) \
+        .addGrid(rf.numTrees, [10, 20, 30, 50]).build()
+    predict(tr, te, pipeline, paramGrid, False)
 
 # Decision Tree Regression
 def DT_Algorithm(tr,te,featureIndexer):
@@ -207,21 +206,10 @@ def DT_Algorithm(tr,te,featureIndexer):
     dt = DecisionTreeRegressor(featuresCol="indexedFeatures",labelCol='positive_rating_ratio')
     # Chain indexer and tree in a Pipeline
     pipeline = Pipeline(stages=[featureIndexer, dt])
-    # Train model.  This also runs the indexer.
-    model = pipeline.fit(tr)
-
-    # Make predictions.
-    predictions = model.transform(te)
-    # Select example rows to display.
+    paramGrid=ParamGridBuilder().addGrid(dt.maxDepth, [5, 10, 15]) \
+        .addGrid(dt.minInstancesPerNode, [1, 5, 10]).build()
     print("---------------------Decision Tree Regression---------------------")
-    predictions.select("features", "positive_rating_ratio", "prediction").show(10)
-    # Select (prediction, true label) and compute test error
-    evaluator = RegressionEvaluator(labelCol="positive_rating_ratio", predictionCol="prediction", metricName="rmse")
-    rmse = evaluator.evaluate(predictions)
-    print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
-    treeModel = model.stages[1]
-    # summary only
-    print(treeModel)
+    predict(tr, te, pipeline, paramGrid, False)
 
 # Gradient-boosted tree regression
 def gradient_Boosted(tr,te,featureIndexer):
@@ -229,20 +217,10 @@ def gradient_Boosted(tr,te,featureIndexer):
     gbt = GBTRegressor(featuresCol="indexedFeatures",labelCol='positive_rating_ratio', maxIter=10)
     # Chain indexer and GBT in a Pipeline
     pipeline = Pipeline(stages=[featureIndexer, gbt])
-    # Train model.  This also runs the indexer.
-    model = pipeline.fit(tr)
-
-    # Make predictions.
-    predictions = model.transform(te)
     print("---------------------Gradient-boosted Tree Regression---------------------")
-    # Select example rows to display.
-    predictions.select("features", "positive_rating_ratio", "prediction").show(10)
-    # Select (prediction, true label) and compute test error
-    evaluator = RegressionEvaluator(labelCol="positive_rating_ratio", predictionCol="prediction", metricName="rmse")
-    rmse = evaluator.evaluate(predictions)
-    print("Root Mean Squared Error (RMSE) on test data = %g" % rmse)
-    gbtModel = model.stages[1]
-    print(gbtModel)  # summary only
+    paramGrid = ParamGridBuilder().addGrid(gbt.maxDepth, [5, 10, 15]) \
+       .addGrid(gbt.maxIter, [10, 20, 30]).build()
+    predict(tr, te, pipeline, paramGrid, False)
 
 
 
