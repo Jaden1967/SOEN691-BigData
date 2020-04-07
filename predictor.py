@@ -19,6 +19,8 @@ def predict(algorithm, paramGrid):
     #     print("Coefficients: " + str(model.weights))
     if isinstance(algorithm, LinearRegression):
         print("linear regressor coefficients: " + str(model.bestModel.stages[-1].coefficients))
+    else:
+        print("Model coefficients: ", model.bestModel.stages[1])
     #make prediction
     predictions =model.transform(testing)
     #print prediction samples
