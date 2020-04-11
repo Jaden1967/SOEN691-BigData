@@ -22,6 +22,8 @@ A supportive data ‘steamspy_tags’ is also retrieved from the same website. T
 2.1.2 Data Transformation and feature selection
 The following is a snapshot of original data schema
 
+![](images/1.png)
+
 Appid and name is removed from features since they have minimum value for training model
 Release_date is transformed to the number of days the game had been released until the dataset was collected(May 2019). Since the exact date when dataset was collected is unknown, we assumed it is on May 15th.
 Value for english column is either 1 or 0, standing for english supported or not. 
