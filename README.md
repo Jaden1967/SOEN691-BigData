@@ -28,16 +28,25 @@ The following is a snapshot of original data schema
 
 ![](images/1.png)
 
-Appid and name is removed from features since they have minimum value for training model
+Appid and name is removed from features since they have minimum value for training model.
+
 Release_date is transformed to the number of days the game had been released until the dataset was collected(May 2019). Since the exact date when dataset was collected is unknown, we assumed it is on May 15th.
+
 Value for english column is either 1 or 0, standing for english supported or not. 
-Developer has more than 70,000 distinct values, if we apply one-hot encoding and map each of the value to an additional feature the feature space will end up having very high dimension. The solution is to transform this feature to the number of products for each developer, representing the scale of the game company
-Publisher is removed from the feature since it is overlapping developer
-Platforms is applied one-hot encoding(details for this technology are explained later in this report) and mapped to three additional features(mac, windows and linux)
-Categories and genres overlap steamspy_tags, they are removed from features
+
+Developer has more than 70,000 distinct values, if we apply one-hot encoding and map each of the value to an additional feature the feature space will end up having very high dimension. The solution is to transform this feature to the number of products for each developer, representing the scale of the game company.
+
+Publisher is removed from the feature since it is overlapping developer.
+
+Platforms is applied one-hot encoding(details for this technology are explained later in this report) and mapped to three additional features(mac, windows and linux).
+
+Categories and genres overlap steamspy_tags, they are removed from features.
+
 Steamspy_tags is applied customized one-hot encoding. Each game can have multiple tags, in built one-hot encoding library in spark does not support a categorical feature to have multiple values where our customized one does so.
+
 Positive_ratings and Negative_ratings are used to generate positive_rating_ratio, which is our label.
-The following is a snapshot of schema of selected features after transformation
+
+The following is a snapshot of schema of selected features after transformation:
 
 ![](images/2.png)
 
@@ -47,6 +56,7 @@ The following is a snapshot of schema of selected features after transformation
 
 ## 2.2 Technologies for Data Processing
 Because our raw data is very clean and there is no missing or erroneous data, for preprocessing we mainly just modified the form of our label and applied one-hot encoding to some features in string format. 
+
 To avoid adding too many features, we’ve also deleted some useless columns which have less affection on final results, such as developer information, name of games.
 
 ### 2.2.1 One-hot Encoding
@@ -55,6 +65,7 @@ Since some informational features selected for this project are categorical and 
 ![](images/4.png)
 
 eg. ‘steamspy_tags’
+
 The form of the string consists of some certain tags with semicolons. The amount of tags actually is only about 300. So that we download the other CSV file which contains the name of the tags. And then generate the tags columns in the final dataframe. For those extracted features, we add ‘1’ or ‘0’.
 
 One-hot encoding is the solution to this problem, by representing each feature with binary vectors. In such a case, the model will not have a preference for a specific data point because it has a better value representing its category.
@@ -158,9 +169,7 @@ For each round of different K values, Random Forest has the lowest RMSE.
 
 Generally, for tree models, the RMSE are basically decreased with the increase of K fold. However, Linear Regression is not sensitive to the change of K value and has the worst performance among the 4 models we trained. The main reason for this result should be the constitution of our features. Some of them(the tags that are encoded) are not linearly related to the result.
 
-Therefore, Random Forest  regression is the best model for our dataset.
-
-
+Therefore, Random Forest regression is the best model for our dataset.
 
 
 
