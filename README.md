@@ -143,13 +143,13 @@ Therefore, Random Forest  regression is the best model for our dataset.
 
 # 4.Discussion
 ## 4.1 Relevance
-      Regression analysis is a predictive modeling technique used to study the relationship between the target as dependent variable  and the predictor variable as  independent variable. This project belongs to the topic of regression prediction in supervised learning, which uses different regression algorithms to build models for prediction of praise rate. To be specific, GBTs are based on Decision Tree and Boosting mechanism, while random forest is based on Decision Tree and Bagging mechanism, both of them are ensembles of Decision Tree. On this basis, the overall performance of GBTs and Random Forests is better than Decision Tree.
+Regression analysis is a predictive modeling technique used to study the relationship between the target as dependent variable  and the predictor variable as  independent variable. This project belongs to the topic of regression prediction in supervised learning, which uses different regression algorithms to build models for prediction of praise rate. To be specific, GBTs are based on Decision Tree and Boosting mechanism, while random forest is based on Decision Tree and Bagging mechanism, both of them are ensembles of Decision Tree. On this basis, the overall performance of GBTs and Random Forests is better than Decision Tree.
 ## 4.2 Limitations
-      The most obvious limitation of our prediction is the number of features. We need more numerical features which can represent the popularity of a game. For instance, the financial investment on producing the game should be an important feature for a game.
+The most obvious limitation of our prediction is the number of features. We need more numerical features which can represent the popularity of a game. For instance, the financial investment on producing the game should be an important feature for a game.
 Secondly, we should try some other models like KNN, SVM to compare. Because decision tree models usually take higher training time than other models. A small change in the data can cause a large change in the structure of the decision tree causing instability.
 ## 4.3 Future Work 
-      For the future research and improvement work, our team intends to put more effort on discovering the related features and using a more logistical approach to convert them into the numerical system. In order to get a related optimite result, we may need more data preparation knowledge.
-      Apart from that, it is necessary to keep trying to implement different algorithms on the dataset and analyse the result with multiple metrics.
+For the future research and improvement work, our team intends to put more effort on discovering the related features and using a more logistical approach to convert them into the numerical system. In order to get a related optimite result, we may need more data preparation knowledge.
+Apart from that, it is necessary to keep trying to implement different algorithms on the dataset and analyse the result with multiple metrics.
       
        
 # Reference
