@@ -1,15 +1,9 @@
-
-Concordia University
-SOEN 691 Big Data Analytics
- 
-Winter 2020
-DATA ANALYSIS PROJECT
- Prediction of praise rate for new games
+Prediction of praise rate for new games
 ========================================
-Mengxuan Qiu:40082721
-Xiyun Zhang:40059295
- Yilin Li: 40083064
-Yuhua Jiang:40083453
+Mengxuan Qiu:40082721<br>
+Xiyun Zhang:40059295<br>
+ Yilin Li: 40083064<br>
+Yuhua Jiang:40083453<br>
 # Abstract
 In recent years, for people of all ages and all places, PC games have become an irreplaceable part of their daily lives. Among the most famous digital gaming distribution platforms, Steam not only attracts tons of loyal customers but also has a highly admirable praise rate of their games. For the records, it may depend on several independent factors such as language support and game classification. In order to explore the reason behind the   success of the steam platform, in this project, our team intends to find out what are those underlying factors and use them to predict the praise rate of the corresponding game. We implement several different supervised learning algorithms from spark.ml library on an open data source provided by Steam. When the training is finished, The model should be able to predict the praise rate of new games.
 
