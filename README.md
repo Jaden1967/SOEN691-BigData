@@ -2,7 +2,7 @@ Prediction of praise rate for new games
 ========================================
 Mengxuan Qiu:40082721<br>
 Xiyun Zhang:40059295<br>
- Yilin Li: 40083064<br>
+Yilin Li: 40083064<br>
 Yuhua Jiang:40083453<br>
 # Abstract
 In recent years, for people of all ages and all places, PC games have become an irreplaceable part of their daily lives. Among the most famous digital gaming distribution platforms, Steam not only attracts tons of loyal customers but also has a highly admirable praise rate of their games. For the records, it may depend on several independent factors such as language support and game classification. In order to explore the reason behind the   success of the steam platform, in this project, our team intends to find out what are those underlying factors and use them to predict the praise rate of the corresponding game. We implement several different supervised learning algorithms from spark.ml library on an open data source provided by Steam. When the training is finished, The model should be able to predict the praise rate of new games.
@@ -178,7 +178,7 @@ Therefore, Random Forest regression is the best model for our dataset.
 Regression analysis is a predictive modeling technique used to study the relationship between the target as dependent variable  and the predictor variable as  independent variable. This project belongs to the topic of regression prediction in supervised learning, which uses different regression algorithms to build models for prediction of praise rate. To be specific, GBTs are based on Decision Tree and Boosting mechanism, while random forest is based on Decision Tree and Bagging mechanism, both of them are ensembles of Decision Tree. On this basis, the overall performance of GBTs and Random Forests is better than Decision Tree.
 ## 4.2 Limitations
 The most obvious limitation of our prediction is the number of features. We need more numerical features which can represent the popularity of a game. For instance, the financial investment on producing the game should be an important feature for a game.
-Secondly, we should try some other models like KNN, SVM to compare. The three algorithm decision trees, gradient-boosted tree, and random forest of this project are all based on the decision tree, so these three algorithms have similarities. Because decision tree models usually take higher training time than other models. A small change in the data can cause a large change in the structure of the decision tree causing instability.
+Secondly, we should try some other models like KNN, SVM to compare. The three algorithms Decision Tree, Gradient-boosted Tree, and Random Forest of this project are all based on the Decision Tree, so these three algorithms have similarities. Because Decision Tree models usually take higher training time than other models. A small change in the data can cause a large change in the structure of the Decision Tree causing instability.
 ## 4.3 Future Work 
 For the future research and improvement work, our team intends to put more effort on discovering the related features and using a more logistical approach to convert them into the numerical system. In order to get a related optimite result, we may need more data preparation knowledge. Besides, it is necessary for us to compare and learn more data analysis projects of the same type to improve.
 
