@@ -9,8 +9,11 @@ In recent years, for people of all ages and all places, PC games have become an 
 
 # 1.Introduction
 As is well known, the Steam platform is one of the biggest digital distribution platforms for PC games. By 2017, users purchased games through the Steam store for a total of approximately US $ 4.3 billion, accounting for at least 18% of PC game sales worldwide [1]. By 2019, the Steam service has more than 34,000 games and more than 95 million monthly active users [1]. In this context, it is worth studying the underlying factors behind the popularity and use them to find out the praise rate a new may chase.
+
 In this project, several supervised learning regression algorithms will be used to build a model to predict the praise rate of the new games. Then we will analyze the performance of different regression algorithms based on this dataset according to the prediction results and evaluator.
-More specifically, the proportion of positive comments in the total number of comments will be used as a standard for the positive rate of a game. Apart from that, the following factors will also be considered: release date, English, developer, publisher, platforms, required age, categories, genres, Steamspy tags, achievements, average playtime, median playtime, owners, price. By using one-hot encoding and self knowledge to prepare and filt the non-necessary factors,the model will build only based on a partial of original dataset .
+
+More specifically, the proportion of positive comments in the total number of comments will be used as a standard for the positive rate of a game. Apart from that, the following factors will also be considered: release date, English, developer, publisher, platforms, required age, categories, genres, Steamspy tags, achievements, average playtime, median playtime, owners, price. By using one-hot encoding and self knowledge to prepare and filt the non-necessary factors,the model will build only based on a partial of original dataset.
+
 For the smooth progress of this project, we will carry out the following related work. Firstly, we will check the relevant papers and online materials to confirm the reliability of the research direction, find the relevant data sets and analyze which data in the data sets can be used in the project. After that, we are going to look at the previous work that has been done with the dataset we select, finding the useful technologies and approach we can apply in our project, learning from their experience and defining the improvements we can make. Secondly, apply data processing technologies to process the raw data into a data format that can be used directly by supervised learning. Thirdly, select the applicable data analysis and regression algorithms to build the model. After training and testing the model, it can be used to predict the praise rate of a game. In the end, discuss and analyze the performance of each algorithm. All the above work requires the fair division and cooperation of all the team members. In order to reach that, we plan to discuss the project progress and solve the difficulties encountered on a weekly basis.
 
 
@@ -18,8 +21,9 @@ For the smooth progress of this project, we will carry out the following related
 ## 2.1 Dataset
 ### 2.1.1 Data Source
 The dataset we will use in this project is retrieved from https://www.kaggle.com[2], which is composed of more than 27,000 games’ information gathered from the Steam store and SteamSpy APIs around May 2019. 
+
 A supportive data ‘steamspy_tags’ is also retrieved from the same website. This file includes all possible steamspy_tags values among all games from the above dataset.
-2.1.2 Data Transformation and feature selection
+### 2.1.2 Data Transformation and feature selection
 The following is a snapshot of original data schema
 
 ![](images/1.png)
@@ -67,6 +71,7 @@ After basic analysis, brainstorming and background research on the scope of our 
 
 ### 2.3.1 Linear Regression
 Linear regression is a common Statistical Data Analysis technique. Linear regression analysis is used to predict the value of the praise rate of a game based on the values of other factors when the praise rate as the dependent variable and the factors are independent variables.
+
 There are two types of linear regression, simple linear regression and multiple linear regression. We observed that there are more than 5 features that are directly proportional to the results(rate of our good feedback). Therefore, we plan to try the multiple linear regression models first to do the prediction.
 
 ### 2.3.2 Decision Tree Regression
@@ -117,7 +122,9 @@ Gradient-boosted Tree Regression parameters: maxDepth, maxIter.
 ![](images/12.png)
 
 Random Forest Regression parameters: maxDepth, numTrees.
+
 -maxDepth: The maximum depth of each tree in the forest. Increasing the depth can improve the expressive ability of the model, but too many results in overfitting. 
+
 -numTrees: The number of trees in the forest. Increasing the number can reduce the variance of prediction and improve the accuracy of model testing.
 
 
@@ -148,7 +155,9 @@ Therefore, we only choose Root Mean Square Error as our metric.
 ![](images/14.png)
 
 For each round of different K values, Random Forest has the lowest RMSE.
+
 Generally, for tree models, the RMSE are basically decreased with the increase of K fold. However, Linear Regression is not sensitive to the change of K value and has the worst performance among the 4 models we trained. The main reason for this result should be the constitution of our features. Some of them(the tags that are encoded) are not linearly related to the result.
+
 Therefore, Random Forest  regression is the best model for our dataset.
 
 
@@ -163,11 +172,13 @@ The most obvious limitation of our prediction is the number of features. We need
 Secondly, we should try some other models like KNN, SVM to compare. Because decision tree models usually take higher training time than other models. A small change in the data can cause a large change in the structure of the decision tree causing instability.
 ## 4.3 Future Work 
 For the future research and improvement work, our team intends to put more effort on discovering the related features and using a more logistical approach to convert them into the numerical system. In order to get a related optimite result, we may need more data preparation knowledge.
+
 Apart from that, it is necessary to keep trying to implement different algorithms on the dataset and analyse the result with multiple metrics.
       
        
 # Reference
 [1] Steam (service), last edited on 8 February 2020, https://en.wikipedia.org/wiki/Steam_(service)
+
 [2] Steam Store Games (Clean dataset). (2020). Retrieved 11 February 2020, from https://www.kaggle.com/nikdavis/steam-store-games
 
 
