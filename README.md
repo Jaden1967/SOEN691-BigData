@@ -35,7 +35,11 @@ Steamspy_tags is applied customized one-hot encoding. Each game can have multipl
 Positive_ratings and Negative_ratings are used to generate positive_rating_ratio, which is our label.
 The following is a snapshot of schema of selected features after transformation
 
+![](images/2.png)
+
 (300+ features generated from steamspy_tags using one-hot encoding are omitted here)
+
+![](images/3.png)
 
 ## 2.2 Technologies for Data Processing
 Because our raw data is very clean and there is no missing or erroneous data, for preprocessing we mainly just modified the form of our label and applied one-hot encoding to some features in string format. 
@@ -43,6 +47,8 @@ To avoid adding too many features, we’ve also deleted some useless columns whi
 
 ### 2.2.1 One-hot Encoding
 Since some informational features selected for this project are categorical and discrete, it is not a good idea to simply give an integer to represent each one of the categorical features, and feed them directly to the training phase. Because without any pre-processing, the output model will ‘think’ that the higher/lower the categorical value is, the better/worse the category is. However, in fact, every category should be treated equally.
+
+![](images/4.png)
 
 eg. ‘steamspy_tags’
 The form of the string consists of some certain tags with semicolons. The amount of tags actually is only about 300. So that we download the other CSV file which contains the name of the tags. And then generate the tags columns in the final dataframe. For those extracted features, we add ‘1’ or ‘0’.
@@ -78,7 +84,9 @@ Random forests are ensembles of decision trees. Random forests combine many deci
 The data after preprocess: After filtering some useless features and one-hot encoding, we have 351 features in all.
 We used Pipeline to generate a vector which contained all the features that are not empty and calculated the ‘positive_rating_ratio’ through positive rating numbers and negative rating numbers.
 
+![](images/5.png)
 
+![](images/6.png)
 
 Besides, we chose k folder cross-validation to re-sampling our dataset. The k value was set as 5 according to the size of our dataset and hardware conditions of our laptops. We split our dataset to 1:9 (testing, training) and only the training part will be applied k-fold validation. The main evaluation metric is RMSE.
 
@@ -88,18 +96,25 @@ Besides, we chose k folder cross-validation to re-sampling our dataset. The k va
 ## 3.2 Technology Implementation
 One hot encoder was implemented based on UDF in pyspark.
 
+![](images/7.png)
 
 Assign different parameters through paramGrid. ParamGrid is used as parameter candidates pool. We predefined a set of parameter candidates based on our knowledge and research. At the end of the cross-validation, the param has the smallest RMSE will be chosen.
 
+![](images/8.png)
+
+![](images/9.png)
 
 Linear Regression parameters: regParam, elasticNetParam.
 
+![](images/10.png)
 
 Decision Tree Regression parameters: maxDepth, minInstancesPerNode.
 
+![](images/11.png)
 
 Gradient-boosted Tree Regression parameters: maxDepth, maxIter.
 
+![](images/12.png)
 
 Random Forest Regression parameters: maxDepth, numTrees.
 -maxDepth: The maximum depth of each tree in the forest. Increasing the depth can improve the expressive ability of the model, but too many results in overfitting. 
@@ -128,6 +143,9 @@ Therefore, we only choose Root Mean Square Error as our metric.
 
 ### 3.3.2 Analysis
 
+![](images/13.png)
+
+![](images/14.png)
 
 For each round of different K values, Random Forest has the lowest RMSE.
 Generally, for tree models, the RMSE are basically decreased with the increase of K fold. However, Linear Regression is not sensitive to the change of K value and has the worst performance among the 4 models we trained. The main reason for this result should be the constitution of our features. Some of them(the tags that are encoded) are not linearly related to the result.
