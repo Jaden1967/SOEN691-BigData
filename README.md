@@ -62,7 +62,7 @@ To avoid adding too many features, we’ve also deleted some useless columns whi
 ### 2.2.1 One-hot Encoding
 Since some informational features selected for this project are categorical and discrete, it is not a good idea to simply give an integer to represent each one of the categorical features, and feed them directly to the training phase. Because without any pre-processing, the output model will ‘think’ that the higher/lower the categorical value is, the better/worse the category is. However, in fact, every category should be treated equally.
 
-![](images/4.png)
+![](images/4.jpg)
 
 eg. ‘steamspy_tags’
 
@@ -180,9 +180,9 @@ Regression analysis is a predictive modeling technique used to study the relatio
 The most obvious limitation of our prediction is the number of features. We need more numerical features which can represent the popularity of a game. For instance, the financial investment on producing the game should be an important feature for a game.
 Secondly, we should try some other models like KNN, SVM to compare. Because decision tree models usually take higher training time than other models. A small change in the data can cause a large change in the structure of the decision tree causing instability.
 ## 4.3 Future Work 
-For the future research and improvement work, our team intends to put more effort on discovering the related features and using a more logistical approach to convert them into the numerical system. In order to get a related optimite result, we may need more data preparation knowledge.
+For the future research and improvement work, our team intends to put more effort on discovering the related features and using a more logistical approach to convert them into the numerical system. In order to get a related optimite result, we may need more data preparation knowledge. Besides, it is necessary for us to compare and learn more data analysis projects of the same type to improve.
 
-Apart from that, it is necessary to keep trying to implement different algorithms on the dataset and analyse the result with multiple metrics.
+Apart from that, it is necessary to keep trying to implement different regression algorithms such as KNN on the dataset and analyse the result with multiple metrics.
       
        
 # Reference
